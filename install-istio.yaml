@@ -27,6 +27,9 @@
     command: 'helm init --service-account tiller'
   - name: use helm chart to bootstrap all the CRDs
     command: 'helm install /home/centos/istio/istio-1.2.2/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system'
+  - name: Wait for CRDs to deploy
+    pause:
+      seconds: 30
   - name: Install Istio with a helm chart
     command: 'helm install /home/centos/istio/istio-1.2.2/install/kubernetes/helm/istio --name istio --namespace istio-system'
   - name: Label default namespace to enable istio injection
