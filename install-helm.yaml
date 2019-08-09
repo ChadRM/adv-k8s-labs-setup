@@ -26,11 +26,11 @@
       src: /home/centos/helm/linux-amd64/helm
       dest: /usr/bin/helm
       mode: '0755'
-  - name: Initialize Helm & Install Tiller
-    command: helm init --history-max 200
   - name: Create service account
     command: kubectl create serviceaccount --namespace kube-system tiller
   - name: Bind to the appropriate role
     command: kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-  - name: Patch the tiller deployment to use the service account
-    command: kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+  - name: Initialize Helm & Install Tiller
+    command: helm init --history-max 200 --service-account kube-system:tiller
+  #- name: Patch the tiller deployment to use the service account
+  #  command: kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'

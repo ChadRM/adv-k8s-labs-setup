@@ -1,7 +1,12 @@
 ---
 - hosts: all
   remote_user: centos
+  gather_facts: no
   tasks:
+  - name: Wait for cluster
+    wait_for_connection:
+  - name: Now gather facts...
+    setup:
   - name: Remove unused directories 1
     file:
       path: /home/centos/1.11.9
