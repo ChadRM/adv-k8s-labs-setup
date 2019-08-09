@@ -1,0 +1,114 @@
+---
+- hosts: all
+  remote_user: centos
+  tasks:
+  - name: Add K8s Repo to Yum
+    become: yes
+    yum_repository:
+      name: kubernetes
+      description: kubernetes
+      baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      enabled: yes
+      gpgcheck: yes
+      gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      exclude: kube*
+      state: present
+  - name: Set up SELINUX enforcement
+    become: yes
+    selinux:
+      state: disabled
+  - name: Set up SELINUX on future boots
+    become: yes
+    selinux:
+      policy: targeted
+      state: permissive
+  - name: Install Kubelet via Yum
+    become: yes
+    yum:
+      name: kubelet
+      state: present
+      disable_excludes: kubernetes
+  - name: Install KubeAdm via Yum
+    become: yes
+    yum:
+      name: kubeadm
+      state: present
+      disable_excludes: kubernetes
+  - name: Enable and Start Kubelet Service
+    become: yes
+    systemd:
+      enabled: yes
+      state: started
+      name: kubelet
+  - name: Set up host ip6 bridging
+    become: yes
+    sysctl:
+      name: net.bridge.bridge-nf-call-ip6tables
+      value: '1'
+      state: present
+      sysctl_set: yes
+      reload: yes
+  - name: Set up host ip4 bridging
+    become: yes
+    sysctl:
+      name: net.bridge.bridge-nf-call-iptables
+      value: '1'
+      state: present
+      sysctl_set: yes
+      reload: yes
+  - name: Pull Kubeadm Images
+    become: yes
+    command: kubeadm config images pull
+  - name: Clean up previous Kubeadm run if necessary
+    become: yes
+    command: kubeadm reset -f
+- hosts: masters
+  remote_user: centos
+  tasks:        
+  - name: Install Kubernetes Master
+    become: yes
+    command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  - name: Create Configuration Directory
+    file:
+      path: /home/centos/.kube
+      owner: centos
+      group: centos
+      mode: '0775'
+      state: directory
+  - name: Place config files into config directory
+    become: yes
+    copy:
+      remote_src: yes
+      src: /etc/kubernetes/admin.conf
+      dest: /home/centos/.kube/config
+      owner: centos
+      group: centos
+  - name: Install Kubernetes Flannel Networking
+    command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml
+  - name: Make Join Command
+    script: /root/k8s-adv/scripts/make-join-command.sh
+    become: yes
+  - name: Get join commands from masters
+    fetch:
+      src: /home/centos/join.sh
+      dest: /root/k8s-adv/join/{{ cluster }}.sh
+      flat: yes
+- hosts: minions
+  remote_user: centos
+  tasks:
+  - name: Run Join Command on each minion
+    script: /root/k8s-adv/join/{{ cluster }}.sh
+    become: yes
+- hosts: masters
+  remote_user: centos
+  tasks:
+  - name: Clean up - remove join command from masters
+    file:
+      path: /home/centos/join.sh
+      state: absent
+- hosts: localhost
+  tasks:
+  - name: Clean up - remove local copies of join commands
+    file:
+      path: /root/k8s-adv/join
+      state: absent

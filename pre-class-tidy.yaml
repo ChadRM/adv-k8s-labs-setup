@@ -1,0 +1,16 @@
+---
+- hosts: all
+  remote_user: centos
+  tasks:
+  - name: Remove unused directories 1
+    file:
+      path: /home/centos/1.11.9
+      state: absent
+  - name: Remove unused directories 2
+    file:
+      path: /home/centos/1.12.1
+      state: absent
+  - name: Remove unused directories 3
+    file:
+      path: /home/centos/~devinparrish
+      state: absent

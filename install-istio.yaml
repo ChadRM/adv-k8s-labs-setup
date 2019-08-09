@@ -1,0 +1,31 @@
+---
+- hosts: masters
+  remote_user: centos
+  tasks:        
+  - name: Create istio yaml manifests directory
+    file:
+      path: /home/centos/istio
+      owner: centos
+      group: centos
+      mode: '0775'
+      state: directory
+  - name: Download v1.2.2 of Istio
+    get_url:
+      url: https://github.com/istio/istio/releases/download/1.2.2/istio-1.2.2-linux.tar.gz
+      dest: /home/centos/istio/istio.tar.gz
+      checksum: sha256:a6ad3684d1b42901a526e7a755088b48402d7cd3420002fbbbb445a8a0117813 
+  - name: Extract istio
+    unarchive:
+      remote_src: yes
+      src: /home/centos/istio/istio.tar.gz
+      dest: /home/centos/istio
+  - name: Add Istio Repo to Helm
+    command: 'helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.2.2/charts/'
+  - name: Create istio service account
+    command: 'kubectl apply -f /home/centos/istio/istio-1.2.2/install/kubernetes/helm/helm-service-account.yaml'
+  - name: Not sure I need this but, init helm again?
+    command: 'helm init --service-account tiller'
+  - name: use helm chart to bootstrap all the CRDs
+    command: 'helm install /home/centos/istio/istio-1.2.2/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system'
+  - name: Install Istio with a helm chart
+    command: 'helm install /home/centos/istio/istio-1.2.2/install/kubernetes/helm/istio --name istio --namespace istio-system'

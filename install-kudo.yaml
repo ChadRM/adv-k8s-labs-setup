@@ -1,0 +1,65 @@
+---
+- hosts: masters
+  remote_user: centos
+  tasks:
+  - name: Create Kudo yaml manifests directory
+    file:
+      path: /home/centos/kudo
+      owner: centos
+      group: centos
+      mode: '0775'
+      state: directory
+  - name: Install Kudo prereqs into cluster
+    command: kubectl apply -f https://raw.githubusercontent.com/kudobuilder/kudo/v0.5.0/docs/deployment/00-prereqs.yaml
+  - name: install kudo CRDs into cluster
+    command: kubectl apply -f https://raw.githubusercontent.com/kudobuilder/kudo/v0.5.0/docs/deployment/10-crds.yaml
+  - name: deploy kudo cluster components
+    command: kubectl apply -f https://raw.githubusercontent.com/kudobuilder/kudo/v0.5.0/docs/deployment/20-deployment.yaml
+  - name: Download Go (can't use yum because version too old)
+    get_url:
+      url: https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
+      dest: /home/centos/kudo/go.tar.gz
+      checksum: sha256:66d83bfb5a9ede000e33c6579a91a29e6b101829ad41fffb5c5bb6c900e109d9
+  - name: Install go
+    become: yes
+    unarchive:
+      remote_src: yes
+      src: /home/centos/kudo/go.tar.gz
+      dest: /usr/local
+  - name: Clean up the go archive
+    file:
+      path: /home/centos/kudo/go.tar.gz
+      state: absent
+  - name: Copy Go onto root's path
+    become: yes
+    copy:
+      remote_src: yes
+      src: /usr/local/go/bin/go
+      dest: /sbin/go
+      mode: '0755'
+  - name: Get the kudo source
+    git:
+      repo: 'https://github.com/kudobuilder/kudo.git'
+      dest: /home/centos/kudo
+  - name: Create the output binary destination
+    file:
+      path: /home/centos/bin
+      state: directory
+  - name: Build the kubectl kudo plugin
+    become: yes
+    environment:
+      GOBIN: /home/centos/bin
+    make:
+      chdir: /home/centos/kudo
+      target: cli-install
+  - name: Move the kubectl kudo plugin to path
+    become: yes
+    copy:
+      remote_src: yes
+      src: /home/centos/bin/kubectl-kudo
+      dest: /usr/bin
+      mode: '0755'
+  - name: Clean up
+    file:
+      path: /home/centos/bin
+      state: absent

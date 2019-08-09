@@ -1,0 +1,45 @@
+---
+- hosts: masters
+  remote_user: centos
+  tasks:        
+  - name: Create NFS yaml manifests directory
+    file:
+      path: /home/centos/nfs
+      owner: centos
+      group: centos
+      mode: '0775'
+      state: directory
+  - name: Upload rbac YAML
+    copy:
+      src: ./yaml/nfs/rbac.yaml
+      dest: /home/centos/nfs/rbac.yaml
+      owner: centos
+      group: centos
+      mode: '0664'
+  - name: Upload statefulset.yaml
+    copy:
+      src: ./yaml/nfs/statefulset.yaml
+      dest: /home/centos/nfs/statefulset.yaml
+      owner: centos
+      group: centos
+      mode: '0644'
+  - name: Upload class.yaml
+    copy:
+      src: ./yaml/nfs/class.yaml
+      dest: /home/centos/nfs/class.yaml
+      owner: centos
+      group: centos
+      mode: '0644'
+  - name: Create the RBAC objects
+    command: kubectl apply -f /home/centos/nfs/rbac.yaml
+  - name: create the provisioner statefulset
+    command: kubectl apply -f /home/centos/nfs/statefulset.yaml
+  - name: create the storage class
+    command: kubectl apply -f /home/centos/nfs/class.yaml
+  - name: Edit the API flags to include DefaultStorageClass
+    become: yes
+    replace:
+      path: /etc/kubernetes/manifests/kube-apiserver.yaml
+      regexp: "NodeRestriction$"
+      replace: "NodeRestriction,DefaultStorageClass"
+

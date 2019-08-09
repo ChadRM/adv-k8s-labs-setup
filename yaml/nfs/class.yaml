@@ -1,0 +1,9 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: dynamic-nfs-d2iq
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: d2iq-training.com/nfs
+mountOptions:
+  - vers=4.1
