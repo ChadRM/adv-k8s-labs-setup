@@ -1,0 +1,30 @@
+---
+- hosts: masters
+  remote_user: centos
+  tasks:        
+  - name: Create Traefik yaml manifests directory
+    file:
+      path: /home/centos/traefik
+      owner: centos
+      group: centos
+      mode: '0775'
+      state: directory
+  - name: Upload rbac YAML
+    copy:
+      src: ./yaml/traefik/traefik-rbac.yaml
+      dest: /home/centos/traefik/traefik-rbac.yaml
+      owner: centos
+      group: centos
+      mode: '0664'
+  - name: Upload daemonset yaml
+    copy:
+      src: ./yaml/traefik/traefik-ds.yaml
+      dest: /home/centos/traefik/traefik-ds.yaml
+      owner: centos
+      group: centos
+      mode: '0644'
+  - name: Create the RBAC objects
+    command: kubectl apply -f /home/centos/traefik/traefik-rbac.yaml
+  - name: create the ingress controller objects
+    command: kubectl apply -f /home/centos/traefik/traefik-ds.yaml
+

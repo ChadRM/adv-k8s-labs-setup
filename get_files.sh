@@ -7,5 +7,5 @@ cat ./inventory/* > ./inventory/inv.concat
 #rm ./inventory/dc*.txt
 #parse this shit in python
 #sh ./create_inv.sh
-echo "Now run ./create_inv.sh and then ->"
-echo "ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-k8s.yaml"
+#echo "Now run ./create_inv.sh and then ->"
+#echo "ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-k8s.yaml"
