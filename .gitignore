@@ -1,3 +1,4 @@
 #ignore files used to build clusters
 student_key
 inventory/*
+scripts/kubectl-kudo
