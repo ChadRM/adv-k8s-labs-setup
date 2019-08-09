@@ -2,6 +2,8 @@
 - hosts: all
   remote_user: centos
   tasks:
+  - name: Wait for cluster to be ready
+    wait_for_connection:
   - name: Add K8s Repo to Yum
     become: yes
     yum_repository:
