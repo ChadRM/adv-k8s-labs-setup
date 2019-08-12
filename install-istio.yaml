@@ -21,10 +21,6 @@
       dest: /home/centos/istio
   - name: Add Istio Repo to Helm
     command: 'helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.2.2/charts/'
-  - name: Create istio service account
-    command: 'kubectl apply -f /home/centos/istio/istio-1.2.2/install/kubernetes/helm/helm-service-account.yaml'
-  - name: Not sure I need this but, init helm again?
-    command: 'helm init --service-account tiller'
   - name: use helm chart to bootstrap all the CRDs
     command: 'helm install /home/centos/istio/istio-1.2.2/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system'
   - name: Wait for CRDs to deploy
