@@ -11,6 +11,7 @@ echo "========================Install Dynamic NFS PV Provisioner..."
 ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-dnfs.yaml
 echo "========================Install KUDO..."
 ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-kudo.yaml
+ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-kudo-plugin.yaml
 echo "========================Install Helm..."
 ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-helm.yaml
 echo "========================Install Istio..."

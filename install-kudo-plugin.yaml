@@ -1,0 +1,10 @@
+---
+- hosts: masters
+  remote_user: centos
+  tasks:
+  - name: Move the kubectl-kudo plugin to path
+    become: yes
+    copy:
+      src: ./scripts/kubectl-kudo
+      dest: /usr/bin
+      mode: '0755'

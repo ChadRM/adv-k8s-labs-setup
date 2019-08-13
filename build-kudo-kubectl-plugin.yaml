@@ -1,5 +1,5 @@
 ---
-- hosts: masters
+- hosts: buildmaster
   remote_user: centos
   tasks:
   - name: Create Kudo yaml manifests directory
@@ -58,7 +58,11 @@
       src: /home/centos/bin/kubectl-kudo
       dest: ./scripts/
       flat: yes
-  - name: Clean up
+  - name: Clean up bin
     file:
       path: /home/centos/bin
+      state: absent
+  - name: Clean up kudo
+    file: 
+      path: /home/centos/kudo
       state: absent

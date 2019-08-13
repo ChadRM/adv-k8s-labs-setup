@@ -6,6 +6,7 @@ outfile.writelines(["all: \n","  children: \n"])
 
 thisline = rawfile.readline()
 newline = ""
+buildmaster = ""
 masters = []
 minions = []
 while thisline:
@@ -16,6 +17,7 @@ while thisline:
   elif "bootstrap-node-public" in thisline:
     thisline = rawfile.readline()
     masters.append(thisline[:len(thisline)-1])
+    buildmaster = thisline[:len(thisline)-1]
     newline = "        " + thisline[:len(thisline)-1] + ": \n"
     outfile.writelines([newline])
     thisline = rawfile.readline()
@@ -41,6 +43,7 @@ for i in masters:
 outfile.writelines(["    minions: \n","      hosts: \n"])
 for i in minions:
   outfile.writelines(["        " + i + ": \n"])
+outfile.writelines(["    buildmaster: \n","      hosts: \n","        " + buildmaster + ": \n"])
 outfile.writelines(["\n\n"])
 
 rawfile.close()
