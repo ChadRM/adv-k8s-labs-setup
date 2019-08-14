@@ -32,5 +32,3 @@
     command: kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
   - name: Initialize Helm & Install Tiller
     command: helm init --history-max 200 --service-account tiller
-  #- name: Patch the tiller deployment to use the service account
-  #  command: kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'

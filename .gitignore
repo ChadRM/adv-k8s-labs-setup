@@ -2,3 +2,4 @@
 student_key
 inventory/*
 scripts/kubectl-kudo
+scripts/k9s
