@@ -67,7 +67,7 @@
   tasks:        
   - name: Install Kubernetes Master
     become: yes
-    command: kubeadm init --pod-network-cidr=10.244.0.0/16
+    command: kubeadm init --pod-network-cidr=192.168.0.0/16
   - name: Create Configuration Directory
     file:
       path: /home/centos/.kube
@@ -83,8 +83,8 @@
       dest: /home/centos/.kube/config
       owner: centos
       group: centos
-  - name: Install Kubernetes Flannel Networking
-    command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml
+  - name: Install Kubernetes Calico Networking
+    command: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
   - name: Make Join Command
     script: /root/k8s-adv/scripts/make-join-command.sh
     become: yes

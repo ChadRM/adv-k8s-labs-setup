@@ -11,9 +11,9 @@
       state: directory
   - name: Download Go (can't use yum because version too old)
     get_url:
-      url: https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
+      url: https://dl.google.com/go/go1.13.linux-amd64.tar.gz
       dest: /home/centos/kudo/go.tar.gz
-      checksum: sha256:66d83bfb5a9ede000e33c6579a91a29e6b101829ad41fffb5c5bb6c900e109d9
+      checksum: sha25668a2297eb099d1a76097905a2ce334e3155004ec08cdea85f24527be3c48e856
   - name: Install go
     become: yes
     unarchive:
