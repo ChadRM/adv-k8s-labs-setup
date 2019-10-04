@@ -8,7 +8,7 @@ ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-k8s.yaml
 echo "========================Install K9s Client..."
 ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-k9s.yaml
 echo "========================Install Traefik Ingress Controller..."
-ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-traefik.yaml
+ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-ingress.yaml
 echo "========================Install Dynamic NFS PV Provisioner..."
 ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-dnfs.yaml
 echo "========================Install KUDO..."

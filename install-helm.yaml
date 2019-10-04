@@ -31,4 +31,4 @@
   - name: Bind to the appropriate role
     command: kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
   - name: Initialize Helm & Install Tiller
-    command: helm init --history-max 200 --service-account tiller
+    command: helm init --history-max 200 --service-account tiller --override spec.selector.matchLabels.'name'='tiller',spec.selector.matchLabels.'app'='helm' --output yaml | sed 's@apiVersion: extensions/v1beta1@apiVersion: apps/v1@' | kubectl apply -f -
