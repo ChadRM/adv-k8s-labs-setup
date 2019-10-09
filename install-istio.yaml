@@ -9,24 +9,29 @@
       group: centos
       mode: '0775'
       state: directory
-  - name: Download v1.2.2 of Istio
+  - name: Download v1.3.1 of Istio
     get_url:
-      url: https://github.com/istio/istio/releases/download/1.2.2/istio-1.2.2-linux.tar.gz
+      url: https://github.com/istio/istio/releases/download/1.3.1/istio-1.3.1-linux.tar.gz
       dest: /home/centos/istio/istio.tar.gz
-      checksum: sha256:a6ad3684d1b42901a526e7a755088b48402d7cd3420002fbbbb445a8a0117813 
+      checksum: sha256:72cf2a931dd20509ea21bdceb16d8330d53d7e236e1a26fffc24a54404998389 
   - name: Extract istio
     unarchive:
       remote_src: yes
       src: /home/centos/istio/istio.tar.gz
       dest: /home/centos/istio
-  - name: Add Istio Repo to Helm
-    command: 'helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.2.2/charts/'
-  - name: use helm chart to bootstrap all the CRDs
-    command: 'helm install /home/centos/istio/istio-1.2.2/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system'
-  - name: Wait for CRDs to deploy
-    pause:
-      seconds: 15
-  - name: Install Istio with a helm chart
-    command: 'helm install /home/centos/istio/istio-1.2.2/install/kubernetes/helm/istio --name istio --namespace istio-system'
-  - name: Label default namespace to enable istio injection
-    command: kubectl label namespace default istio-injection=enabled
+  - name: Move istioctl to path
+    become: yes
+    copy:
+      remote_src: yes
+      src: /home/centos/istio/istio-1.3.1/bin/istioctl
+      dest: /usr/bin/istioctl
+      mode: '0755'
+  - name: Copy CRD creation script to host
+    copy:
+      src: ./scripts/create-istio-crds.sh
+      dest: /home/centos/istio/create-crds.sh
+      mode: '0755'
+  - name: Create CRDs
+    command: /home/centos/istio/create-crds.sh
+  - name: Install Istio in "Demo" mode
+    command: kubectl apply -f /home/centos/istio/istio-1.3.1/install/kubernetes/istio-demo.yaml

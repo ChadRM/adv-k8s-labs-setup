@@ -6,6 +6,8 @@ echo "========================Tidying up..."
 ansible-playbook --key-file=student_key -i ./inventory/inv.yaml pre-class-tidy.yaml
 echo "========================Install K9s Client..."
 ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-k9s.yaml
+echo "========================Upload Sock Shop..."
+ansible-playbook --key-file=student_key -i ./inventory/inv.yaml upload-sockshop.yaml
 echo "========================Done!"
 echo "Started at $STARTED"
 echo "Ended at $(date)"
