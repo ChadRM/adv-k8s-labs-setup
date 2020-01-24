@@ -11,9 +11,9 @@
       state: directory
   - name: Download v3.0.0.b3 of Helm
     get_url:
-      url: https://get.helm.sh/helm-v3.0.0-beta.3-linux-amd64.tar.gz
+      url: https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz
       dest: /home/centos/helm/helm.tar.gz
-      checksum: sha256:23705380590bdb3e70e1bc8649fe1c90a75905bdc12ae6e6f6a9c16db9801594
+      checksum: sha256:c6b7aa7e4ffc66e8abb4be328f71d48c643cb8f398d95c74d075cfb348710e1d
   - name: Extract helm  
     unarchive:
       remote_src: yes
