@@ -21,3 +21,4 @@ ansible-playbook --key-file=student_key -i ./inventory/inv.yaml install-istio.ya
 echo "========================Done!"
 echo "Started at $STARTED"
 echo "Ended at $(date)"
+#test
