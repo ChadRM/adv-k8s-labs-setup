@@ -1,0 +1,59 @@
+---
+- hosts: masters
+  remote_user: centos
+  tasks:        
+  - name: Create Ingress yaml manifests directory
+    file:
+      path: /home/centos/ingress
+      owner: centos
+      group: centos
+      mode: '0775'
+      state: directory
+  - name: Upload setup manifest
+    copy:
+      src: ./scripts/ingress/01-ingress-ns-config.yaml
+      dest: /home/centos/ingress/01-ingress-ns-config.yaml
+      owner: centos
+      group: centos
+      mode: '0664'
+  - name: Upload default backend manifest
+    copy:
+      src: ./scripts/ingress/02-ingress-default-backend.yaml
+      dest: /home/centos/ingress/02-ingress-default-backend.yaml
+      owner: centos
+      group: centos
+      mode: '0644'
+  - name: Upload load balancer manifest
+    copy:
+      src: ./scripts/ingress/03-ingress-lb.yaml
+      dest: /home/centos/ingress/03-ingress-lb.yaml
+      owner: centos
+      group: centos
+      mode: '0644'
+  - name: Upload the whoami test manifest
+    copy:
+      src: ./scripts/ingress/04-whoami-test.yaml
+      dest: /home/centos/ingress/04-whoami-test.yaml
+      owner: centos
+      group: centos
+      mode: '0644'
+  - name: Upload sock shop manifest
+    copy:
+      src: ./scripts/ingress/05-sockshop-test.yaml
+      dest: /home/centos/ingress/05-sockshop-test.yaml
+      owner: centos
+      group: centos
+      mode: '0644'
+  - name: Upload sockshop ingress rule manifest
+    copy:
+      src: ./scripts/ingress/06-sockshop-ingress.yaml
+      dest: /home/centos/ingress/06-sockshop-ingress.yaml
+      owner: centos
+      group: centos
+      mode: '0644'
+  - name: Create the Namespace & ConfigMaps
+    command: kubectl apply -f /home/centos/ingress/01-ingress-ns-config.yaml
+  - name: create the ingress controller objects
+    command: kubectl apply -f /home/centos/ingress/02-ingress-default-backend.yaml
+  - name: create the ingress load balancer objects
+    command: kubectl apply -f /home/centos/ingress/03-ingress-lb.yaml

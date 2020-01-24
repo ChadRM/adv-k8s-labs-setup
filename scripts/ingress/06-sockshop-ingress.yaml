@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1 
+kind: Ingress 
+metadata:
+  name: sockshop-rule
+  namespace: sock-shop 
+spec:
+  rules:
+  - host: ec2-x-x-x-x.compute-1.amazonaws.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: front-end
+          servicePort: 80

@@ -9,11 +9,11 @@
       group: centos
       mode: '0775'
       state: directory
-  - name: Download v2.14.3 of Helm
+  - name: Download v3.0.0.b3 of Helm
     get_url:
-      url: https://get.helm.sh/helm-v2.14.3-linux-amd64.tar.gz
+      url: https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz
       dest: /home/centos/helm/helm.tar.gz
-      checksum: sha256:38614a665859c0f01c9c1d84fa9a5027364f936814d1e47839b05327e400bf55
+      checksum: sha256:c6b7aa7e4ffc66e8abb4be328f71d48c643cb8f398d95c74d075cfb348710e1d
   - name: Extract helm  
     unarchive:
       remote_src: yes
@@ -26,9 +26,7 @@
       src: /home/centos/helm/linux-amd64/helm
       dest: /usr/bin/helm
       mode: '0755'
-  - name: Create service account
-    command: kubectl create serviceaccount --namespace kube-system tiller
-  - name: Bind to the appropriate role
-    command: kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-  - name: Initialize Helm & Install Tiller
-    command: helm init --history-max 200 --service-account tiller
+  - name: Add Default "stable" helm repo
+    command: helm repo add stable https://kubernetes-charts.storage.googleapis.com
+  - name: Update Stable repo
+    command: helm repo update
