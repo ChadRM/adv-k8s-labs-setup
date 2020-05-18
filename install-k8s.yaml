@@ -40,14 +40,9 @@
       enabled: yes
       state: started
       name: kubelet
-  - name: Set up host ip6 bridging
+  - name: Make sure the bridges are set up
     become: yes
-    sysctl:
-      name: net.bridge.bridge-nf-call-ip6tables
-      value: '1'
-      state: present
-      sysctl_set: yes
-      reload: yes
+    command: modprobe br_netfilter
   - name: Set up host ip4 bridging
     become: yes
     sysctl:

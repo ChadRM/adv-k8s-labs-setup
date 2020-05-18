@@ -1,0 +1,9 @@
+---
+- hosts: masters
+  remote_user: centos
+  tasks:        
+  - name: Install Nano
+    become: yes
+    yum:
+      name: nano
+      state: present
