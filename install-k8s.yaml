@@ -28,6 +28,11 @@
       name: kubelet
       state: present
       disable_excludes: kubernetes
+  - name: Update Everything in Yum
+    become: yes
+    yum:
+      name: "*"
+      state: latest
   - name: Install KubeAdm via Yum
     become: yes
     yum:
@@ -51,9 +56,9 @@
       state: present
       sysctl_set: yes
       reload: yes
-  - name: Pull Kubeadm Images
-    become: yes
-    command: kubeadm config images pull
+#  - name: Pull Kubeadm Images
+#    become: yes
+#    command: kubeadm config images pull
   - name: Clean up previous Kubeadm run if necessary
     become: yes
     command: kubeadm reset -f
