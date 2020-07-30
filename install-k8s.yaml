@@ -86,18 +86,18 @@
   - name: Install Kubernetes Calico Networking
     command: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
   - name: Make Join Command
-    script: /root/k8s-adv/scripts/make-join-command.sh
+    script: /home/ubuntu/adv-k8s-labs-setup/scripts/make-join-command.sh
     become: yes
   - name: Get join commands from masters
     fetch:
       src: /home/centos/join.sh
-      dest: /root/k8s-adv/join/{{ cluster }}.sh
+      dest: /home/ubuntu/adv-k8s-labs-setup/scripts/join/{{ cluster }}.sh
       flat: yes
 - hosts: minions
   remote_user: centos
   tasks:
   - name: Run Join Command on each minion
-    script: /root/k8s-adv/join/{{ cluster }}.sh
+    script: /home/ubuntu/adv-k8s-labs-setup/scripts/join/{{ cluster }}.sh
     become: yes
 - hosts: masters
   remote_user: centos
@@ -110,5 +110,5 @@
   tasks:
   - name: Clean up - remove local copies of join commands
     file:
-      path: /root/k8s-adv/join
+      path: /home/ubuntu/adv-k8s-labs-setup/scripts/join
       state: absent
