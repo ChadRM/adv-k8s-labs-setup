@@ -10,24 +10,18 @@ buildmaster = ""
 masters = []
 minions = []
 while thisline:
-  if "dcos-training" in thisline:
+  if "mk100-environment" in thisline:
     newline = "    " + thisline[:len(thisline)-1] + ": \n"
     outfile.writelines([newline,"      vars: \n","        cluster: " + thisline[:len(thisline)-1] + " \n","      hosts: \n"])
     thisline = rawfile.readline()
-  elif "bootstrap-node-public" in thisline:
+  elif "master-nodes-public-ips" in thisline:
     thisline = rawfile.readline()
     masters.append(thisline[:len(thisline)-1])
     buildmaster = thisline[:len(thisline)-1]
     newline = "        " + thisline[:len(thisline)-1] + ": \n"
     outfile.writelines([newline])
     thisline = rawfile.readline()
-  elif "master-nodes-public" in thisline:
-    thisline = rawfile.readline()
-    minions.append(thisline[:len(thisline)-1])
-    newline = "        " + thisline[:len(thisline)-1] + ": \n"
-    outfile.writelines([newline])
-    thisline = rawfile.readline()
-  elif "publicagent-public" in thisline:
+  elif "minion-public-ips" in thisline:
     thisline = rawfile.readline()
     while thisline != "\n":
       minions.append(thisline[:len(thisline)-1])

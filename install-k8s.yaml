@@ -1,50 +1,40 @@
 ---
 - hosts: all
-  remote_user: centos
+  remote_user: ubuntu
   tasks:
-  - name: Add K8s Repo to Yum
+  - name: Add K8s apt-key
     become: yes
-    yum_repository:
-      name: kubernetes
-      description: kubernetes
-      baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-      enabled: yes
-      gpgcheck: yes
-      gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-      exclude: kube*
+    apt_key:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
       state: present
-  - name: Set up SELINUX enforcement
+  - name: Add K8s Repo to apt
     become: yes
-    selinux:
-      state: disabled
-  - name: Set up SELINUX on future boots
-    become: yes
-    selinux:
-      policy: targeted
-      state: permissive
-  - name: Install Kubelet via Yum
-    become: yes
-    yum:
-      name: kubelet
+    apt_repository:
+      repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
       state: present
-      disable_excludes: kubernetes
-  - name: Update Everything in Yum
+      update_cache: yes
+  - name: Install curl, transport and docker.io
     become: yes
-    yum:
-      name: "*"
-      state: latest
-  - name: Install KubeAdm via Yum
-    become: yes
-    yum:
-      name: kubeadm
+    apt:
+      pkg:
+      - curl
+      - apt-transport-https
+      - docker.io
       state: present
-      disable_excludes: kubernetes
-  - name: Enable and Start Kubelet Service
+  - name: Enable Docker at boot time
     become: yes
     systemd:
+      name: docker
       enabled: yes
       state: started
-      name: kubelet
+  - name: Install Kubernetes components via apt
+    become: yes
+    apt:
+      pkg:
+      - kubelet=1.18.2-00
+      - kubeadm=1.18.2-00 
+      - kubectl=1.18.2-00
+      state: present
   - name: Make sure the bridges are set up
     become: yes
     command: modprobe br_netfilter
@@ -56,23 +46,20 @@
       state: present
       sysctl_set: yes
       reload: yes
-#  - name: Pull Kubeadm Images
-#    become: yes
-#    command: kubeadm config images pull
   - name: Clean up previous Kubeadm run if necessary
     become: yes
     command: kubeadm reset -f
 - hosts: masters
-  remote_user: centos
+  remote_user: ubuntu
   tasks:        
   - name: Install Kubernetes Master
     become: yes
     command: kubeadm init --pod-network-cidr=192.168.0.0/16
   - name: Create Configuration Directory
     file:
-      path: /home/centos/.kube
-      owner: centos
-      group: centos
+      path: /home/ubuntu/.kube
+      owner: ubuntu
+      group: ubuntu
       mode: '0775'
       state: directory
   - name: Place config files into config directory
@@ -80,9 +67,9 @@
     copy:
       remote_src: yes
       src: /etc/kubernetes/admin.conf
-      dest: /home/centos/.kube/config
-      owner: centos
-      group: centos
+      dest: /home/ubuntu/.kube/config
+      owner: ubuntu
+      group: ubuntu
   - name: Install Kubernetes Calico Networking
     command: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
   - name: Make Join Command
@@ -90,21 +77,21 @@
     become: yes
   - name: Get join commands from masters
     fetch:
-      src: /home/centos/join.sh
+      src: /home/ubuntu/join.sh
       dest: /home/ubuntu/adv-k8s-labs-setup/scripts/join/{{ cluster }}.sh
       flat: yes
 - hosts: minions
-  remote_user: centos
+  remote_user: ubuntu
   tasks:
   - name: Run Join Command on each minion
     script: /home/ubuntu/adv-k8s-labs-setup/scripts/join/{{ cluster }}.sh
     become: yes
 - hosts: masters
-  remote_user: centos
+  remote_user: ubuntu
   tasks:
   - name: Clean up - remove join command from masters
     file:
-      path: /home/centos/join.sh
+      path: /home/ubuntu/join.sh
       state: absent
 - hosts: localhost
   tasks:
