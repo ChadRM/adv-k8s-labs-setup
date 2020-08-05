@@ -45,7 +45,7 @@
       state: present
   - name: Upgrade node with Kubeadm
     become: yes
-    command: kubeadm upgrade node -y
+    command: kubeadm upgrade node
   - name: Upgrade Kubelet on Worker
     become: yes
     apt:
