@@ -5,7 +5,7 @@ metadata:
   labels:
     app: whoami 
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       app: whoami
@@ -38,10 +38,9 @@ metadata:
   name: whoami-ingress 
 spec:
   rules:
-  - host: *
-    http:
+  - http:
       paths:
-      - path: /
+      - path: /whoami
         backend:
           serviceName: whoami
           servicePort: 80

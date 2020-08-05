@@ -1,18 +1,18 @@
 ---
 - hosts: masters
-  remote_user: centos
+  remote_user: ubuntu
   tasks:        
   - name: Create Ingress yaml manifests directory
     file:
-      path: /home/centos/ingress
-      owner: centos
-      group: centos
+      path: /home/ubuntu/sockshop
+      owner: ubuntu
+      group: ubuntu
       mode: '0775'
       state: directory
   - name: Upload sock shop manifest
     copy:
       src: ./scripts/ingress/05-sockshop-test.yaml
-      dest: /home/centos/ingress/05-sockshop-test.yaml
-      owner: centos
-      group: centos
+      dest: /home/ubuntu/sockshop/sock-shop.yaml
+      owner: ubuntu
+      group: ubuntu
       mode: '0644'

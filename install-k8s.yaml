@@ -70,8 +70,8 @@
       dest: /home/ubuntu/.kube/config
       owner: ubuntu
       group: ubuntu
-  - name: Install Kubernetes Calico Networking
-    command: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+  - name: Install Calico
+    command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
   - name: Make Join Command
     script: /home/ubuntu/adv-k8s-labs-setup/scripts/make-join-command.sh
     become: yes

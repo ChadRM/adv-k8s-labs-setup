@@ -5,8 +5,7 @@ metadata:
   namespace: sock-shop 
 spec:
   rules:
-  - host: ec2-x-x-x-x.compute-1.amazonaws.com
-    http:
+  - http:
       paths:
       - path: /
         backend:

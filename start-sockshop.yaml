@@ -1,0 +1,17 @@
+---
+- hosts: masters
+  remote_user: ubuntu
+  tasks:        
+  - name: Upload sockshop ingress rule manifest
+    copy:
+      src: ./scripts/ingress/06-sockshop-ingress.yaml
+      dest: /home/ubuntu/ingress/sockshop-ingress.yaml
+      owner: ubuntu
+      group: ubuntu
+      mode: '0644'
+  - name: Delete the whoami test
+    command: kubectl delete -f /home/ubuntu/ingress/whoami-test.yaml
+  - name: Start the sock-shop
+    command: kubectl create -f /home/ubuntu/sock-shop/sock-shop.yaml
+  - name: Create the ingress rule
+    command: kubectl create -f /home/ubuntu/ingress/sockshop-ingress.yaml

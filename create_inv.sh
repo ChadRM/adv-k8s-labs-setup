@@ -12,12 +12,14 @@ minions = []
 while thisline:
   if "mk100-environment" in thisline:
     newline = "    " + thisline[:len(thisline)-1] + ": \n"
-    outfile.writelines([newline,"      vars: \n","        cluster: " + thisline[:len(thisline)-1] + " \n","      hosts: \n"])
+    outfile.writelines([newline,"      vars: \n","        cluster: " + thisline[:len(thisline)-1] + " \n"])
     thisline = rawfile.readline()
   elif "master-nodes-public-ips" in thisline:
     thisline = rawfile.readline()
     masters.append(thisline[:len(thisline)-1])
     buildmaster = thisline[:len(thisline)-1]
+    newline = "        cluster_master: " + thisline[:len(thisline)-1] + "\n"
+    outfile.writelines([newline,"      hosts: \n"])
     newline = "        " + thisline[:len(thisline)-1] + ": \n"
     outfile.writelines([newline])
     thisline = rawfile.readline()
