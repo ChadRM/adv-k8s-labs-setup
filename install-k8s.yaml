@@ -54,7 +54,7 @@
   tasks:        
   - name: Install Kubernetes Master
     become: yes
-    command: kubeadm init --pod-network-cidr=192.168.0.0/16
+    command: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=1.18.2
   - name: Create Configuration Directory
     file:
       path: /home/ubuntu/.kube
