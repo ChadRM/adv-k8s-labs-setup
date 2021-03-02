@@ -31,10 +31,13 @@
     become: yes
     apt:
       pkg:
-      - kubelet=1.18.2-00
-      - kubeadm=1.18.2-00 
-      - kubectl=1.18.2-00
+      - kubelet=1.19.2-00
+      - kubeadm=1.19.2-00 
+      - kubectl=1.19.2-00
       state: present
+  - name: Prevent Kubernetes components from accidentally being upgraded
+    become: yes
+    command: apt-mark hold kubelet kubeadm kubectl
   - name: Make sure the bridges are set up
     become: yes
     command: modprobe br_netfilter
@@ -54,7 +57,7 @@
   tasks:        
   - name: Install Kubernetes Master
     become: yes
-    command: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=1.18.2
+    command: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=1.19.2
   - name: Create Configuration Directory
     file:
       path: /home/ubuntu/.kube
@@ -70,6 +73,7 @@
       dest: /home/ubuntu/.kube/config
       owner: ubuntu
       group: ubuntu
+      mode: '0600'
   - name: Install Calico
     command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
   - name: Make Join Command

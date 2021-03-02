@@ -1,10 +1,10 @@
 ---
 - hosts: masters
-  remote_user: centos
+  remote_user: ubuntu
   tasks:
   - name: Install the very cool k9s client
     become: yes
     copy:
       src: ./scripts/k9s
-      dest: /usr/bin
+      dest: /usr/local/bin
       mode: '0755'

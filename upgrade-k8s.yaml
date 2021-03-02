@@ -1,34 +1,44 @@
 ---
-#  - name: Install Kubernetes components via apt
-#    become: yes
-#    apt:
-#      pkg:
-#      - kubelet=1.18.2-00
-#      - kubeadm=1.18.2-00 
-#      - kubectl=1.18.2-00
-#      state: present
 - hosts: masters
   remote_user: ubuntu
   tasks:        
   - name: Drain Master Node Host:[{{ansible_hostname}}]
     command: kubectl drain {{ansible_hostname}} --ignore-daemonsets
-  - name: Update Kubeadm to v1.18.3
+  - name: Release hold on Kubeadm package for upgrade
+    become: yes
+    command: apt-mark unhold kubeadm kubectl kubelet
+  - name: Update cache and upgrade dependencies
     become: yes
     apt:
-      pkg: kubeadm=1.18.3-00
+      pkg: kubernetes-cni
+      update_cache: yes
+      state: latest
+  - name: Update Kubeadm to {{ kube_ver_adm }}
+    become: yes
+    apt:
+      pkg: kubeadm={{ kube_ver_apt }}
+      force: yes
       state: present
+  - name: Put new hold on Kubeadm package
+    become: yes
+    command: apt-mark hold kubeadm
   - name: Run kubeadm upgrade plan on master
     become: yes
     command: kubeadm upgrade plan
   - name: Run the upgrade on the master
     become: yes
-    command: kubeadm upgrade apply v1.18.3 -y
+    command: kubeadm upgrade apply {{ kube_ver_adm }} -y
   - name: Upgrade the kubelet and kubectl on master
     become: yes
     apt:
       pkg:
-      - kubelet=1.18.3-00
-      - kubectl=1.18.3-00
+      - kubelet={{ kube_ver_apt }}
+      - kubectl={{ kube_ver_apt }}
+      state: present
+      force: yes
+  - name: Put new hold on kubelet and kubectl
+    become: yes
+    command: apt-mark hold kubelet kubectl
   - name: Uncordon the master
     command: kubectl uncordon {{ansible_hostname}}
 - hosts: minions
@@ -36,21 +46,42 @@
   serial: 1
   tasks:
   - name: Drain Worker [{{ansible_hostname}}] on [{{cluster_master}}]
-    command: "kubectl drain {{ansible_hostname}} --ignore-daemonsets --delete-local-data"
+    command: kubectl drain {{ansible_hostname}} --ignore-daemonsets --delete-local-data
     delegate_to: "{{cluster_master}}"
-  - name: Upgrade Kubeadm on worker
+  - name: Release hold on Kubeadm
+    become: yes
+    command: apt-mark unhold kubeadm kubelet kubectl
+  - name: Update cache and upgrade dependencies
     become: yes
     apt:
-      pkg: kubeadm=1.18.3-00
+      pkg: kubernetes-cni
+      update_cache: yes
+      state: latest
+      force: yes
+  - name: Upgrade Kubeadm on worker to version {{kube_ver_apt}}
+    become: yes
+    apt:
+      pkg: kubeadm={{kube_ver_apt}}
       state: present
+      force: yes
+      update_cache: yes
+  - name: Put new hold on Kubeadm
+    become: yes
+    command: apt-mark hold kubeadm
   - name: Upgrade node with Kubeadm
     become: yes
     command: kubeadm upgrade node
-  - name: Upgrade Kubelet on Worker
+  - name: Upgrade Kubelet on Worker to {{kube_ver_apt}}
     become: yes
     apt:
-      pkg: kubelet=1.18.3-00
+      pkg: kubelet={{kube_ver_apt}}
+      pkg: kubectl={{kube_ver_apt}}
       state: present
+      force: yes
+      update_cache: yes
+  - name: Put new hold on Kubelet
+    become: yes
+    command: apt-mark hold kubelet kubectl
   - name: Uncordon Worker [{{ansible_hostname}}] on {{cluster_master}}
-    command: "kubectl uncordon {{ansible_hostname}}"
+    command: kubectl uncordon {{ansible_hostname}}
     delegate_to: "{{cluster_master}}"

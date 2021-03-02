@@ -1,6 +1,6 @@
 ---
 - hosts: masters
-  remote_user: centos
+  remote_user: ubuntu
   tasks:
   - name: Move the kubectl-kudo plugin to path
     become: yes

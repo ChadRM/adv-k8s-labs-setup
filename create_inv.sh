@@ -17,8 +17,10 @@ while thisline:
   elif "master-nodes-public-ips" in thisline:
     thisline = rawfile.readline()
     masters.append(thisline[:len(thisline)-1])
-    buildmaster = thisline[:len(thisline)-1]
+    if buildmaster == "":
+      buildmaster = thisline[:len(thisline)-1]
     newline = "        cluster_master: " + thisline[:len(thisline)-1] + "\n"
+    newline = "        buildmaster: " + buildmaster + "\n"
     outfile.writelines([newline,"      hosts: \n"])
     newline = "        " + thisline[:len(thisline)-1] + ": \n"
     outfile.writelines([newline])

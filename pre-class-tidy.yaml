@@ -7,8 +7,53 @@
     wait_for_connection:
   - name: Now gather facts...
     setup:
-  - name: Set color prompt
-    lineinfile:
-      dest: /home/ubuntu/.bashrc
-      regexp: '^#force_color_prompt.*$'
-      line: 'force_color_prompt=yes'
+  - name: Update Apt
+    become: yes
+    apt:
+      autoclean: yes
+      autoremove: yes
+      update_cache: yes
+      upgrade: dist
+  - name: Install the docker.io package on buildmaster
+    run_once: yes
+    delegate_to: "{{ buildmaster }}"
+    become: yes
+    apt:
+      name: docker.io
+      state: latest
+  - name: Find the docker.io package
+    run_once: yes
+    delegate_to: "{{ buildmaster }}"
+    become: yes
+    find:
+      paths: /var/cache/apt/archives
+      recurse: no
+      patterns: docker.io_*.deb
+    register: dockerio_pkg
+#  - name: Sync the package to all other hosts
+#    become: yes
+#    delegate_to: "{{ buildmaster }}"
+#    synchronize:
+#      dest: "/home/ubuntu/docker.io.deb"
+#      dest: "{{ dockerio_pkg.files[0].path }}"
+#      src: "{{dockerio_pkg.files[0].path }}"
+#      owner: yes
+#      perms: yes
+  - name: Get the .deb file from buildmaster, store locally
+    run_once: yes
+    delegate_to: "{{ buildmaster }}"
+    become: yes
+    fetch:
+      src:  "{{ dockerio_pkg.files[0].path }}"
+      dest: scripts/docker.io/currdockerpkg.deb
+      flat: yes
+  - name: Upload docker.io package to all hosts since I can't make sync work
+    become: yes
+    copy: 
+      dest: "{{ dockerio_pkg.files[0].path }}"
+      src:  "scripts/docker.io/currdockerpkg.deb"
+      mode: '644'
+  - name: Reboot
+    become: yes
+    reboot:
+      connect_timeout: 120

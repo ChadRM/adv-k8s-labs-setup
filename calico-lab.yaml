@@ -1,0 +1,105 @@
+---
+- hosts: all
+  remote_user: ubuntu
+  tasks:
+  - name: Add K8s apt-key
+    become: yes
+    apt_key:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      state: present
+  - name: Add K8s Repo to apt
+    become: yes
+    apt_repository:
+      repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+      state: present
+      update_cache: yes
+  - name: Install curl, transport and docker.io
+    become: yes
+    apt:
+      pkg:
+      - curl
+      - apt-transport-https
+      - docker.io
+      state: present
+  - name: Enable Docker at boot time
+    become: yes
+    systemd:
+      name: docker
+      enabled: yes
+      state: started
+  - name: Install Kubernetes components via apt
+    become: yes
+    apt:
+      pkg:
+      - kubelet=1.18.2-00
+      - kubeadm=1.18.2-00 
+      - kubectl=1.18.2-00
+      state: present
+  - name: Prevent Kubernetes components from accidentally being upgraded
+    become: yes
+    command: apt-mark hold kubelet kubeadm kubectl
+  - name: Make sure the bridges are set up
+    become: yes
+    command: modprobe br_netfilter
+  - name: Set up host ip4 bridging
+    become: yes
+    sysctl:
+      name: net.bridge.bridge-nf-call-iptables
+      value: '1'
+      state: present
+      sysctl_set: yes
+      reload: yes
+  - name: Clean up previous Kubeadm run if necessary
+    become: yes
+    command: kubeadm reset -f
+- hosts: masters
+  remote_user: ubuntu
+  tasks:        
+  - name: Install Kubernetes Master
+    become: yes
+    command: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=1.18.2
+  - name: Create Configuration Directory
+    file:
+      path: /home/ubuntu/.kube
+      owner: ubuntu
+      group: ubuntu
+      mode: '0775'
+      state: directory
+  - name: Place config files into config directory
+    become: yes
+    copy:
+      remote_src: yes
+      src: /etc/kubernetes/admin.conf
+      dest: /home/ubuntu/.kube/config
+      owner: ubuntu
+      group: ubuntu
+      mode: '0600'
+#  - name: Install Calico
+#    command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+  - name: Make Join Command
+    script: /home/ubuntu/adv-k8s-labs-setup/scripts/make-join-command.sh
+    become: yes
+  - name: Get join commands from masters
+    fetch:
+      src: /home/ubuntu/join.sh
+      dest: /home/ubuntu/adv-k8s-labs-setup/scripts/join/{{ cluster }}.sh
+      flat: yes
+- hosts: minions
+  remote_user: ubuntu
+  tasks:
+  - name: Run Join Command on each minion
+    script: /home/ubuntu/adv-k8s-labs-setup/scripts/join/{{ cluster }}.sh
+    become: yes
+- hosts: masters
+  remote_user: ubuntu
+  tasks:
+  - name: Clean up - remove join command from masters
+    file:
+      path: /home/ubuntu/join.sh
+      state: absent
+- hosts: localhost
+  tasks:
+  - name: Clean up - remove local copies of join commands
+    file:
+      path: /home/ubuntu/adv-k8s-labs-setup/scripts/join
+      state: absent
